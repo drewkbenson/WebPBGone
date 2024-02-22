@@ -1,0 +1,12 @@
+I need to find out what the WebP ProgID is and punch holes for it in the reg edit
+
+https://stackoverflow.com/questions/2123762/add-menu-item-to-windows-context-menu-only-for-specific-filetype
+Registry.SetValue(@"HKEY_CURRENT_USER\Software\Classes\.webp", null, "WebPBGone");
+// Registry.SetValue(@"HKEY_CURRENT_USER\Software\Classes\.webm", null, "WebPBGone");
+Registry.SetValue(@"HKEY_CURRENT_USER\Software\Classes\WebPBGone\shell\open\command", null, @"c:\path\to\app.exe \"%1\"");
+
+
+
+
+Get an installer that adds the registry edits, as well as make an installer that adds this to C:\Users\*username*\AppData\Roaming\WebPBGone
+https://stackoverflow.com/a/67714286

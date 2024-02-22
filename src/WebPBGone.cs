@@ -1,29 +1,67 @@
 ﻿using System;
-using System.Windows.Media.Imaging;
-using System.IO;
-using ImageMagick;
 using System.Collections;
+using System.IO;
+using System.Windows.Media.Imaging;
+
+using ImageMagick;
 
 namespace WebPBGone
 {
-    internal class Program
+    internal class WebPBGoneHandler
     {
         static void Main(string[] args)
         {
+            var pathToImage = args[0];
+            var outputType;
 
+            if (args.length() == 1)
+            {
+                convertToPng(pathToImage);
+            }
+            else if (args[1] == "png")
+            {
+                convertToPng(pathToImage);
+            }
+            else if (args[1] == "jpg")
+            {
+                convertToJpg(pathToImage);
+            }
         }
 
+        /*
+        Takes file path as a string, reads the file in, converts it to a png using the ImageMagick library, then create the new image in a .png format
+        Writes it to the same filename, just with .png instead of .webm
+        */
         static void convertToPng(string filePath)
         {
             var outputFile = Path.ChangeExtension(filePath, "png");
-            using (var stream = new FileStream(filePath, FileMode.Open))
+            using (var inputStream = new FileStream(filePath, FileMode.Open))
             {
-                using (var image = new MagickImage(stream))
+                using (var image = new MagickImage(inputStream))
                 {
                     using (var outputStream = new FileStream(filePath, FileMode.Create))
                     {
                         image.Format = MagickFormat.Png;
-                        image.Quality = 80;
+                        image.Write(outputStream);
+                    }
+                }
+            }
+        }
+
+        /* 
+        This might be useless, I'm going to have it anyway for flexibility in case I decide to add a jpg option later
+        */
+        static void convertToJpg(string filePath)
+        {
+            var outputFile = Path.ChangeExtension(filePath, "jpg");
+            using (var inputStream = new FileStream(filePath, FileMode.Open))
+            {
+                using (var image = new MagickImage(inputStream))
+                {
+                    using (var outputStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        image.Format = MagickFormat.Png;
+                        image.Quality = 100;
                         image.Write(outputStream);
                     }
                 }
