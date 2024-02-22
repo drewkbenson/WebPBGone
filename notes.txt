@@ -11,5 +11,5 @@ Registry.SetValue(@"HKEY_LOCAL_MACHINE\Software\Classes\WebPBGone\shell\open\com
 
 
 
-Get an installer that adds the registry edits, as well as make an installer that adds this to C:\Users\*username*\AppData\Roaming\WebPBGone
+Get an installer that adds the registry edits, as well as make an installer that adds this to C:\Program/ Files\WebPBGone\
 https://stackoverflow.com/a/67714286
