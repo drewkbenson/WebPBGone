@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using System.IO;
 using ImageMagick;
+using System.Collections;
 
 namespace WebPBGone
 {
@@ -12,18 +10,21 @@ namespace WebPBGone
     {
         static void Main(string[] args)
         {
-            using (var stream = new MemoryStream(byteArray))
+
+        }
+
+        static void convertToPng(string filePath)
+        {
+            var outputFile = Path.ChangeExtension(filePath, "png");
+            using (var stream = new FileStream(filePath, FileMode.Open))
             {
                 using (var image = new MagickImage(stream))
                 {
-                    // Convert the WebP image to a JPG image
-                    using (var outputStream = new MemoryStream())
+                    using (var outputStream = new FileStream(filePath, FileMode.Create))
                     {
                         image.Format = MagickFormat.Png;
                         image.Quality = 80;
                         image.Write(outputStream);
-
-                        return Convert.ToBase64String(outputStream.ToArray());
                     }
                 }
             }
