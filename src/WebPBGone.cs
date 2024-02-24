@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
-using System.Windows.Media.Imaging;
 
 using ImageMagick;
 
@@ -12,9 +10,8 @@ namespace WebPBGone
         static void Main(string[] args)
         {
             var pathToImage = args[0];
-            var outputType;
 
-            if (args.length() == 1)
+            if (args.Length == 1)
             {
                 convertToPng(pathToImage);
             }
@@ -35,11 +32,12 @@ namespace WebPBGone
         static void convertToPng(string filePath)
         {
             var outputFile = Path.ChangeExtension(filePath, "png");
+            Console.WriteLine(outputFile);
             using (var inputStream = new FileStream(filePath, FileMode.Open))
             {
                 using (var image = new MagickImage(inputStream))
                 {
-                    using (var outputStream = new FileStream(filePath, FileMode.Create))
+                    using (var outputStream = new FileStream(outputFile, FileMode.Create))
                     {
                         image.Format = MagickFormat.Png;
                         image.Write(outputStream);
@@ -58,7 +56,7 @@ namespace WebPBGone
             {
                 using (var image = new MagickImage(inputStream))
                 {
-                    using (var outputStream = new FileStream(filePath, FileMode.Create))
+                    using (var outputStream = new FileStream(outputFile, FileMode.Create))
                     {
                         image.Format = MagickFormat.Png;
                         image.Quality = 100;

@@ -1,0 +1,13 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\WebPBGone\shell\Convert to PNG\command]
+@="\"[ProgramFilesFolder]WebPBGone\\WebPBGone.exe\" %1"
+
+[HKEY_CLASSES_ROOT\WebPBGone\Application]
+"ApplicationName"="WebPBGone"
+
+[HKEY_CLASSES_ROOT\.webp\OpenWithProgids]
+"WebPBGone"=""
+
+[HKEY_CLASSES_ROOT\.webp]
+@="WebPBGone"

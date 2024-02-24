@@ -2,3 +2,10 @@
 packages/*
 bin/*
 obj/*
+src/bin/*
+src/obj/*
+src/packages/*
+installer/packages/*
+installer/installer/bin/*
+installer/installer/obj/*
+installer/installer/wix/*
