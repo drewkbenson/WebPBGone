@@ -25,36 +25,48 @@ namespace installer
                 //regValues.ToWObject()
                 new ManagedAction(RegistryKeys.addRegistryKeys)
                 );
-
             project.LicenceFile = @".\License.rtf";
 
             Compiler.BuildMsi(project);
+
+            //I ran into some issues when installing with the above installer due to permission issues with the keys
+            //This installer is the above but has the user install the keys manually with a .reg file
+            //Kinda a hack, kinda don't care
+
+            var projectLite = new Project("WebPBGoneLite",
+                new Dir(@"%ProgramFiles%\WebPBGone",
+                    new DirFiles(@"..\..\src\bin\Release\*.dll"),
+                    new File(@"..\..\src\bin\Release\WebPBGone.exe"))
+                );
+            project.LicenceFile = @".\License.rtf";
+
+            Compiler.BuildMsi(projectLite);
+        }
+
+        static void RegistryFailure(SetupEventArgs e)
+        {
+            
         }
     }
 
-    public class RegistryKeys
+    class RegistryKeys
     {
         [CustomAction]
         public static ActionResult addRegistryKeys(Session session)
         {
             //Registry.SetValue(@"HKEY_LOCAL_MACHINE\Software\Classes\.webp", null, "WebPBGone");
-            var ProgFile = "\"" + Environment.GetEnvironmentVariable("ProgramFiles(x86)") + "\\WebPBGone\\WebPBGone.exe\" %1";
-            Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone\shell\Convert to PNG\command", null, ProgFile);
-            Registry.SetValue(@"HKEY_CLASSES_ROOT\.webp\OpenWithProgids", @"WebPBGone", 0);
-            Registry.SetValue(@"HKEY_CLASSES_ROOT\.webp", null, @"WebPBGone");
-            Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone\Application", "ApplicationName", "WebPBGone");
-            
-            return ActionResult.Success;
-        }
-    }
-
-    public class PlaceFiles
-    {
-        [CustomAction]
-        public static ActionResult addFiles(Session session)
-        {
-            //Add folder C:\Program Files\WebPBGone
-
+            try
+            {
+                var ProgFile = "\"" + Environment.GetEnvironmentVariable("ProgramFiles(x86)") + "\\WebPBGone\\WebPBGone.exe\" %1";
+                Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone\shell\Convert to PNG\command", null, ProgFile);
+                Registry.SetValue(@"HKEY_CLASSES_ROOT\.webp\OpenWithProgids", @"WebPBGone", 0);
+                Registry.SetValue(@"HKEY_CLASSES_ROOT\.webp", null, @"WebPBGone");
+                Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone\Application", "ApplicationName", "WebPBGone");
+            }
+            catch
+            {
+                return ActionResult.Failure;
+            }
             return ActionResult.Success;
         }
     }
