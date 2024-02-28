@@ -18,4 +18,4 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\WebPBGone\shell\open]
 
 [HKEY_CLASSES_ROOT\WebPBGone\shell\open\command]
-@="C:\\Program Files (x86)\\WebPBGone\\WebPBGone.exe \"%1\""
+@="\"C:\\Program Files (x86)\\WebPBGone\\WebPBGone.exe\" \%1"
