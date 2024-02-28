@@ -1,11 +1,10 @@
 ﻿using Microsoft.Deployment.WindowsInstaller;
+using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Security.Principal;
+using System.Drawing;
+using System.Windows.Forms;
 using WixSharp;
-using WixSharp.CommonTasks;
 
 namespace installer
 {
@@ -21,11 +20,13 @@ namespace installer
             var project = new Project("WebPBGone",
                 new Dir(@"%ProgramFiles%\WebPBGone",
                     new DirFiles(@"..\..\src\bin\Release\*.dll"),
-                    new File(@"..\..\src\bin\Release\WebPBGone.exe")),
+                    new WixSharp.File(@"..\..\src\bin\Release\WebPBGone.exe")),
                 //regValues.ToWObject()
                 new ManagedAction(RegistryKeys.addRegistryKeys)
                 );
             project.LicenceFile = @".\License.rtf";
+            project.InstallPrivileges = InstallPrivileges.elevated;
+
 
             Compiler.BuildMsi(project);
 
@@ -36,20 +37,16 @@ namespace installer
             var projectLite = new Project("WebPBGoneLite",
                 new Dir(@"%ProgramFiles%\WebPBGone",
                     new DirFiles(@"..\..\src\bin\Release\*.dll"),
-                    new File(@"..\..\src\bin\Release\WebPBGone.exe"))
+                    new WixSharp.File(@"..\..\src\bin\Release\WebPBGone.exe"))
                 );
-            project.LicenceFile = @".\License.rtf";
+            projectLite.LicenceFile = @".\License.rtf";
+            projectLite.InstallPrivileges = InstallPrivileges.elevated;
 
             Compiler.BuildMsi(projectLite);
         }
-
-        static void RegistryFailure(SetupEventArgs e)
-        {
-            
-        }
     }
 
-    class RegistryKeys
+    public class RegistryKeys
     {
         [CustomAction]
         public static ActionResult addRegistryKeys(Session session)
@@ -57,11 +54,49 @@ namespace installer
             //Registry.SetValue(@"HKEY_LOCAL_MACHINE\Software\Classes\.webp", null, "WebPBGone");
             try
             {
-                var ProgFile = "\"" + Environment.GetEnvironmentVariable("ProgramFiles(x86)") + "\\WebPBGone\\WebPBGone.exe\" %1";
+                var x86Path = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+                var ProgFile = "\"" + x86Path + "\\WebPBGone\\WebPBGone.exe\" %1";
+
+                /*
                 Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone\shell\Convert to PNG\command", null, ProgFile);
                 Registry.SetValue(@"HKEY_CLASSES_ROOT\.webp\OpenWithProgids", @"WebPBGone", 0);
                 Registry.SetValue(@"HKEY_CLASSES_ROOT\.webp", null, @"WebPBGone");
                 Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone\Application", "ApplicationName", "WebPBGone");
+                */
+                Registry.SetValue(@"HKEY_CLASSES_ROOT\.webp", null, "WebPBGone");
+                Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone", null, "WebP Image");
+                Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone", "Content Type", "image/webp");
+                Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone", "PerceivedType", "image");
+                Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone", "ImageOptionFlags", 00000001, RegistryValueKind.DWord);
+                Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone\DefaultIcon", null, x86Path + "\\WebPBGone\\WebPBGone.exe,0");
+                Registry.SetValue(@"HKEY_CLASSES_ROOT\WebPBGone\shell", null, "open");
+                Registry.ClassesRoot.CreateSubKey(@"HKEY_CLASSES_ROOT\WebPBGone\shell\open");
+                var commandKey = Registry.ClassesRoot.CreateSubKey(@"HKEY_CLASSES_ROOT\WebPBGone\shell\open\command");
+                commandKey.SetValue("", x86Path + "\\WebPBGone\\WebPBGone.exe \"%1\"");
+
+                /*
+                
+                [HKEY_CLASSES_ROOT\.webp]
+                @= "WebPBGone"
+
+                [HKEY_CLASSES_ROOT\WebPBGone]
+                @= "WebP Image"
+                "Content Type" = "image/webp"
+                "PerceivedType" = "image"
+                "ImageOptionFlags" = dword:00000001
+
+                [HKEY_CLASSES_ROOT\WebPBGone\DefaultIcon]
+                @= "[ProgramFilesFolderX86]\\WebPBGone\\WebPBGone.exe,0"
+                
+                [HKEY_CLASSES_ROOT\WebPBGone\shell]
+                @= "open"
+                        
+                [HKEY_CLASSES_ROOT\WebPBGone\shell\open]
+
+                [HKEY_CLASSES_ROOT\WebPBGone\shell\open\command]
+                @= "[ProgramFilesFolderX86]\\WebPBGone\\WebPBGone.exe \"%1\""
+
+                */
             }
             catch
             {

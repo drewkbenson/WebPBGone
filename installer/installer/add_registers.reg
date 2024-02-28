@@ -1,13 +1,21 @@
 Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\WebPBGone\shell\Convert to PNG\command]
-@="\"[ProgramFilesFolderX86]WebPBGone\\WebPBGone.exe\" %1"
-
-[HKEY_CLASSES_ROOT\WebPBGone\Application]
-"ApplicationName"="WebPBGone"
-
-[HKEY_CLASSES_ROOT\.webp\OpenWithProgids]
-"WebPBGone"=""
-
 [HKEY_CLASSES_ROOT\.webp]
 @="WebPBGone"
+
+[HKEY_CLASSES_ROOT\WebPBGone]
+@="WebP Image"
+"Content Type"="image/webp"
+"PerceivedType"="image"
+"ImageOptionFlags"=dword:00000001
+
+[HKEY_CLASSES_ROOT\WebPBGone\DefaultIcon]
+@="C:\\Program Files (x86)\\WebPBGone\\WebPBGone.exe,0"
+
+[HKEY_CLASSES_ROOT\WebPBGone\shell]
+@="open"
+
+[HKEY_CLASSES_ROOT\WebPBGone\shell\open]
+
+[HKEY_CLASSES_ROOT\WebPBGone\shell\open\command]
+@="C:\\Program Files (x86)\\WebPBGone\\WebPBGone.exe \"%1\""
