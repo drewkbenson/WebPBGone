@@ -1,16 +1,62 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-
+using System.Linq;
 using ImageMagick;
 
 namespace WebPBGone
 {
     internal class WebPBGoneHandler
     {
+        //                                               0     1     2     3     4     5     6     7     8     9     10    11    12    13    14
+        private static byte[] magicNumber = new byte[] { 0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50, 0x56, 0x50, 0x38 };
         static void Main(string[] args)
         {
-            var pathToImage = args[0];
+            var pathToImages = new List<String>();
+            var deleting = false;
+            var converting_to = "png";
 
+            foreach (var item in args)
+            {
+                if (item.Equals("--delete"))
+                {
+                    deleting = true;
+                }
+                else if (item.Equals("--jpg"))
+                {
+                    converting_to = "jpg";
+                }
+                else
+                {
+                    if (CheckValidWebP(item))
+                    {
+                        pathToImages.Add(item);
+                    }
+                }
+            }
+
+            foreach (var pathToImage in pathToImages)
+            {
+                if (File.Exists(pathToImage))
+                {
+                    if (converting_to.Equals("png"))
+                    {
+                        convertToPng(pathToImage);
+                    }
+                    else
+                    {
+                        convertToJpg(pathToImage);
+                    }
+
+                    if (deleting)
+                    {
+                        File.Delete(pathToImage);
+                    }
+                }
+            }
+
+            // Old code - Ignore
+            /*
             if (args.Length == 1)
             {
                 convertToPng(pathToImage);
@@ -23,6 +69,39 @@ namespace WebPBGone
             {
                 convertToJpg(pathToImage);
             }
+            */
+        }
+
+        static bool CheckValidWebP(string pathToImage)
+        {
+            if (File.Exists(pathToImage))
+            {
+                if (!(File.GetAttributes(pathToImage).HasFlag(FileAttributes.Directory)))
+                {
+                    return checkMagicNumber(pathToImage);
+                }
+            }
+            return false;
+        }
+
+        static bool checkMagicNumber(string pathToImage)
+        {
+            byte[] buffer = new byte[15];
+            using (FileStream fs = new FileStream(pathToImage, FileMode.Open, FileAccess.Read))
+            {
+                var bytesRead = fs.Read(buffer, 0, buffer.Length);
+                if (bytesRead < 15)
+                {
+                    return false;
+                }
+            }
+
+            buffer[4] = 0;
+            buffer[5] = 0;
+            buffer[6] = 0;
+            buffer[7] = 0;
+
+            return buffer.SequenceEqual(magicNumber);
         }
 
         /*

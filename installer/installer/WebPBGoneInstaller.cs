@@ -44,7 +44,7 @@ namespace installer
                     new File(@"..\..\src\bin\Release\WebPBGone.exe")),
                 new RegValue(new Id("WebP"), setup, RegistryHive.ClassesRoot, @".webp", "", "WebPBGone"),
                 new RegValue(new Id("WebPBGone"), setup, RegistryHive.ClassesRoot, @"WebPBGone", "", "WebP Image"),
-                new RegValue(new Id("Icon"), setup, RegistryHive.ClassesRoot, @"WebPBGone\DefaultIcon", "", "C:\\Program Files (x86)\\WebPBGone\\WebPBGone.exe,0"),
+                new RegValue(new Id("Icon"), setup, RegistryHive.ClassesRoot, @"WebPBGone\DefaultIcon", "", @"C:\Program Files (x86)\WebPBGone\WebPBGone.exe,0"),
                 new RegValue(new Id("Shell"), setup, RegistryHive.ClassesRoot, @"WebPBGone\shell", "", "open"),
                 new RegKey(setup, RegistryHive.ClassesRoot, @"WebPBGone\shell\open"),
                 new RegValue(new Id("Command"), setup, RegistryHive.ClassesRoot, @"WebPBGone\shell\open\command", "", "\"C:\\Program Files (x86)\\WebPBGone\\WebPBGone.exe\" %1")
@@ -74,6 +74,49 @@ namespace installer
             projectLite.InstallPrivileges = InstallPrivileges.elevated;
 
             Compiler.BuildMsi(projectLite);
+
+            /*
+            I high key hate this building into 3 MSIs but I should just delete the first two right now
+
+            The point of this one is to allow multiple selections, including entire folders to be recursively gone thru and turned into pngs
+            */
+
+
+            /*
+            [HKEY_CLASSES_ROOT\*\shell\WebPBGone]
+            "MUIVerb"="WebPBGone"
+            "Icon"=""
+            "SubCommands"="WebPBGoneDelete;WebPBGoneNoDelete"
+
+            [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WebPBGoneDelete]
+            "MUIVerb"="Delete"
+
+            [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WebPBGoneDelete\command]
+            "command"="C:\\path\\to\\wasd_program.exe"
+
+            [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WebPBGoneNoDelete]
+            "MUIVerb"="No Delete"
+
+            [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WebPBGoneNoDelete\command]
+            "command"="C:\\path\\to\\wasd_program.exe"
+             */
+            var newSetup = new Feature("NewWebPBGone");
+            var newProject = new Project("NewWebPBGone",
+                new Dir(@"%ProgramFiles%\WebPBGone",
+                    new DirFiles(@"..\..\src\bin\Release\*.dll"),
+                    new File(@"..\..\src\bin\Release\WebPBGone.exe")),
+                new RegValue(new Id("Dropdown"), newSetup, RegistryHive.ClassesRoot, @"*\shell\WebPBGone", "MUIVerb", "WebPBGone"),
+                new RegValue(new Id("DropdownIcon"), newSetup, RegistryHive.ClassesRoot, @"*\shell\WebPBGone", "Icon", @"C:\Program Files (x86)\WebPBGone\WebPBGone.exe,0"),
+                new RegValue(new Id("DropdownCmds"), newSetup, RegistryHive.ClassesRoot, @"*\shell\WebPBGone", "SubCommands", "WebPBGoneDelete;WebPBGoneNoDelete"),
+                new RegValue(new Id("NoDeleteMUI"), newSetup, RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WebPBGoneNoDelete", "MUIVerb", "No Delete"),
+                new RegValue(new Id("NoDeleteCMD"), newSetup, RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WebPBGoneNoDelete\command", "", @"C:\Program Files (x86)\WebPBGone\WebPBGone.exe %1"),
+                new RegValue(new Id("DeleteMUI"),   newSetup, RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WebPBGoneDelete",   "MUIVerb", "Delete"),
+                new RegValue(new Id("DeleteCMD"),   newSetup, RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\WebPBGoneDelete\command",   "", @"C:\Program Files (x86)\WebPBGone\WebPBGone.exe %1 --delete")
+                );
+            newProject.LicenceFile = @".\License.rtf";
+            newProject.InstallPrivileges = InstallPrivileges.elevated;
+
+            Compiler.BuildMsi(newProject);
         }
     }
 }
